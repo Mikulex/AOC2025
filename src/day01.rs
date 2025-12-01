@@ -1,48 +1,47 @@
-use std::{
-    error::Error,
-    fs::{self},
-};
+use std::error::Error;
+use std::fs;
 
-#[derive(Debug)]
-struct Rot {
-    pub count: i32,
-    pub dir: String,
-}
-
-impl Rot {
-    pub fn new(line: &str) -> Self {
-        let split = line.split_at(1);
-        let count = split.1.parse().unwrap();
-        let dir = split.0.to_owned();
-        Self { count, dir }
-    }
-}
-
-pub fn part1(file_path: &str) -> Result<String, Box<dyn Error>> {
-    let mut current = 50;
+pub fn part1(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let mut zero_count = 0;
 
-    fs::read_to_string(file_path)?
+    std::fs::read_to_string(file_path)?
         .lines()
-        .map(Rot::new)
-        .for_each(|r| {
-            if r.dir == "R" {
-                current += r.count;
-            } else {
-                current -= r.count;
-            }
-            current %= 100;
-
-            if current == 0 {
+        .map(|line| line.split_at(1))
+        .map(|(dir, c)| (dir, c.parse::<i32>().unwrap()))
+        .map(|r| if r.0 == "L" { -r.1 } else { r.1 })
+        .fold(50, |acc, i| {
+            let res = (acc + i) % 100;
+            if res == 0 {
                 zero_count += 1;
             }
+            res
         });
+
     return Ok(zero_count.to_string());
 }
 
 pub fn part2(file_path: &str) -> Result<String, Box<dyn Error>> {
-    let _contents = fs::read_to_string(file_path)?;
-    todo!();
+    let mut zero_count = 0;
+
+    fs::read_to_string(file_path)?
+        .lines()
+        .map(|line| line.split_at(1))
+        .map(|(dir, c)| (dir, c.parse::<i32>().unwrap()))
+        .map(|r| if r.0 == "L" { -r.1 } else { r.1 })
+        .fold(50, |acc: i32, mut i| {
+            zero_count += i.abs() / 100;
+            i %= 100;
+
+            let res = acc + i;
+
+            if res % 100 == 0 || (acc != 0 && (res < 0 || res > 100)) {
+                zero_count += 1
+            }
+
+            (if res < 0 { res + 100 } else { res }) % 100
+        });
+
+    return Ok(zero_count.to_string());
 }
 
 #[cfg(test)]
@@ -56,15 +55,26 @@ mod tests {
     }
 
     #[test]
-    fn test_rot_new() {
-        let input = "L32";
-        let res = Rot {
-            count: 32,
-            dir: "L".to_owned(),
-        };
-        let test = Rot::new(input);
+    fn test_day01_part2_res() {
+        let res = part2("inputs/01/demo.txt").unwrap();
+        assert_eq!(res, "6");
+    }
 
-        assert_eq!(res.count, test.count);
-        assert_eq!(res.dir, test.dir);
+    #[test]
+    fn test_day01_part2_single_lap() {
+        let res = part2("inputs/01/1klap.txt").unwrap();
+        assert_eq!(res, "10");
+    }
+
+    #[test]
+    fn test_day01_part2_lap_with_undershoot() {
+        let res = part2("inputs/01/lap_under.txt").unwrap();
+        assert_eq!(res, "10");
+    }
+
+    #[test]
+    fn test_day01_part2_alt_after_zero() {
+        let res = part2("inputs/01/alt_after_zero.txt").unwrap();
+        assert_eq!(res, "2");
     }
 }
