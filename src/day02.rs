@@ -24,12 +24,9 @@ pub fn part2(file_path: &str) -> Result<String, Box<dyn Error>> {
         .flat_map(|mut r| r.next().unwrap()..=r.next().unwrap())
         .map(|s| s.to_string())
         .filter(|s| {
-            (1..=s.len() / 2).filter(|i| s.len() % i == 0).any(|i| {
-                let mut chunks = s.as_bytes().chunks(i);
-
-                let first = &s[..i];
-                chunks.all(|c| c == first.as_bytes())
-            })
+            (1..=s.len() / 2)
+                .filter(|i| s.len() % i == 0)
+                .any(|i| s.as_bytes().chunks(i).all(|c| c == (&s[..i]).as_bytes()))
         })
         .filter_map(|s| s.parse::<u64>().ok())
         .sum();
