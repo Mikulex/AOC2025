@@ -24,25 +24,12 @@ pub fn part2(file_path: &str) -> Result<String, Box<dyn Error>> {
         .flat_map(|mut r| r.next().unwrap()..=r.next().unwrap())
         .map(|s| s.to_string())
         .filter(|s| {
-            let mut res = false;
-            for i in 1..=s.len() / 2 {
-                if s.len() % i == 0 {
-                    let string = s.chars().collect::<Vec<char>>();
+            (1..=s.len() / 2).filter(|i| s.len() % i == 0).any(|i| {
+                let mut chunks = s.as_bytes().chunks(i);
 
-                    let mut chunks = string
-                        .chunks(i)
-                        .map(|v| v.iter().collect::<String>())
-                        .peekable();
-                    let first = chunks.peek().unwrap().clone();
-                    if chunks.all(|c| c.eq(&first.to_owned())) {
-                        res = true;
-                        break;
-                    }
-                } else {
-                    res = false;
-                }
-            }
-            res
+                let first = &s[..i];
+                chunks.all(|c| c == first.as_bytes())
+            })
         })
         .filter_map(|s| s.parse::<u64>().ok())
         .sum();
