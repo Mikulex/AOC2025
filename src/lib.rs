@@ -1,3 +1,5 @@
+use std::error::Error;
+
 mod day01;
 mod day02;
 mod day03;
@@ -8,32 +10,26 @@ pub enum Part {
     SECOND,
 }
 
+type Func = fn(&str) -> Result<String, Box<dyn Error>>;
+
+fn run_day(path: String, part: Part, part1: Func, part2: Func) {
+    if matches!(part, Part::FIRST | Part::BOTH) {
+        println!("{}", part1(&path).unwrap());
+    }
+
+    if matches!(part, Part::SECOND | Part::BOTH) {
+        println!("{}", part2(&path).unwrap());
+    }
+}
+
 pub fn run(day: String, part: Part) {
     let path = format!("inputs/{day}/input.txt");
     if day.eq("01") {
-        if matches!(part, Part::FIRST | Part::BOTH) {
-            println!("{}", day01::part1(&path).unwrap());
-        }
-
-        if matches!(part, Part::SECOND | Part::BOTH) {
-            println!("{}", day01::part2(&path).unwrap());
-        }
+        run_day(path, part, day01::part1, day01::part2);
     } else if day.eq("02") {
-        if matches!(part, Part::FIRST | Part::BOTH) {
-            println!("{}", day02::part1(&path).unwrap());
-        }
-
-        if matches!(part, Part::SECOND | Part::BOTH) {
-            println!("{}", day02::part2(&path).unwrap());
-        }
+        run_day(path, part, day02::part1, day02::part2);
     } else if day.eq("03") {
-        if matches!(part, Part::FIRST | Part::BOTH) {
-            println!("{}", day03::part1(&path).unwrap());
-        }
-
-        if matches!(part, Part::SECOND | Part::BOTH) {
-            println!("{}", day03::part2(&path).unwrap());
-        }
+        run_day(path, part, day03::part1, day03::part2);
     } else {
         panic!("day not implemented");
     }
