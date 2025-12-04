@@ -1,4 +1,4 @@
-use std::{error::Error, fs::read_to_string, ptr::read, vec};
+use std::{error::Error, fs::read_to_string};
 
 pub fn part1(file_path: &str) -> Result<String, Box<dyn Error>> {
     let mut matrix: Vec<Vec<char>> = read_to_string(file_path)?
@@ -6,12 +6,28 @@ pub fn part1(file_path: &str) -> Result<String, Box<dyn Error>> {
         .map(|l| l.chars().collect::<_>())
         .collect();
 
-    let count = remove(matrix);
+    let count = remove(&mut matrix);
 
     return Ok(String::from(count.to_string()));
 }
 
-fn remove(mut matrix: Vec<Vec<char>>) -> i32 {
+pub fn part2(file_path: &str) -> Result<String, Box<dyn Error>> {
+    let mut matrix: Vec<Vec<char>> = read_to_string(file_path)?
+        .lines()
+        .map(|l| l.chars().collect::<_>())
+        .collect();
+
+    let mut count = 0;
+    let mut removed: i32 = remove(&mut matrix);
+    while removed > 0 {
+        count += removed;
+        removed = remove(&mut matrix);
+    }
+
+    return Ok(String::from(count.to_string()));
+}
+
+fn remove(matrix: &mut Vec<Vec<char>>) -> i32 {
     let mut count = 0;
 
     let len = matrix.len() as i32;
@@ -49,17 +65,19 @@ fn remove(mut matrix: Vec<Vec<char>>) -> i32 {
             }
         }
     }
+
+    for x in 0..len {
+        for y in 0..len {
+            if matrix[x as usize][y as usize] == 'x' {
+                matrix[x as usize][y as usize] = '.';
+            }
+        }
+    }
     count
 }
 
 fn outbounds(i: i32, len: i32) -> bool {
     i < 0 || i >= len
-}
-
-pub fn part2(file_path: &str) -> Result<String, Box<dyn Error>> {
-    for line in read_to_string(file_path)?.lines() {}
-
-    return Ok(String::from("value"));
 }
 
 #[cfg(test)]
@@ -70,5 +88,11 @@ mod tests {
     fn test_day04_01() {
         let res = part1("inputs/04/demo.txt").unwrap();
         assert_eq!(res, "13");
+    }
+
+    #[test]
+    fn test_day04_02() {
+        let res = part2("inputs/04/demo.txt").unwrap();
+        assert_eq!(res, "43");
     }
 }
