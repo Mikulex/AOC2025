@@ -1,4 +1,9 @@
-use std::{error::Error, fs::read_to_string, ops::RangeInclusive};
+use std::{
+    cmp::{max, min},
+    error::Error,
+    fs::read_to_string,
+    ops::RangeInclusive,
+};
 
 pub fn part1(file_path: &str) -> Result<String, Box<dyn Error>> {
     let input = read_to_string(file_path)?;
@@ -25,7 +30,37 @@ pub fn part1(file_path: &str) -> Result<String, Box<dyn Error>> {
 }
 
 pub fn part2(file_path: &str) -> Result<String, Box<dyn Error>> {
-    todo!()
+    let mut ranges: Vec<RangeInclusive<u64>> = read_to_string(file_path)?
+        .lines()
+        .filter(|l| !l.is_empty())
+        .take_while(|l| l.contains('-'))
+        .map(|l| l.split('-'))
+        .map(|p| p.map(|v| v.parse::<u64>().unwrap()))
+        .map(|mut it| it.next().unwrap()..=it.next().unwrap())
+        .collect();
+
+    ranges.sort_by(|a, b| a.end().cmp(b.end()));
+
+    let res: usize = ranges
+        .iter()
+        .fold(vec![], |mut acc: Vec<RangeInclusive<u64>>, i| {
+            if acc.is_empty() {
+                acc.push(i.clone());
+            } else if acc.iter().last().unwrap().end() < i.start() {
+                acc.push(i.clone());
+            } else {
+                let last = acc.swap_remove(acc.len() - 1);
+                let start = min(last.start(), i.start());
+                let end = max(last.end(), i.end());
+                acc.push(start.clone()..=end.clone());
+            }
+            acc
+        })
+        .iter()
+        .map(|r| r.clone().count())
+        .sum();
+
+    Ok(res.to_string())
 }
 
 #[cfg(test)]
@@ -38,7 +73,9 @@ mod tests {
         assert_eq!(res, "3");
     }
 
+    #[test]
     fn test_day05_02() {
         let res = part2("inputs/05/demo.txt").unwrap();
+        assert_eq!(res, "14");
     }
 }
