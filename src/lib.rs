@@ -6,6 +6,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 pub enum Part {
     BOTH,
@@ -39,6 +40,8 @@ pub fn run(day: String, part: Part) {
         run_day(path, part, day05::part1, day05::part2);
     } else if day.eq("06") {
         run_day(path, part, day06::part1, day06::part2);
+    } else if day.eq("07") {
+        run_day(path, part, day07::part1, day07::part2);
     } else {
         panic!("day not implemented");
     }
