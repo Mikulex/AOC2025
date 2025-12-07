@@ -1,8 +1,12 @@
-use std::{collections::HashSet, error::Error, fs::read_to_string};
+use std::{
+    collections::{HashMap, HashSet},
+    error::Error,
+    fs::read_to_string,
+};
 
 pub fn part1(file_path: &str) -> Result<String, Box<dyn Error>> {
     let file = read_to_string(file_path)?;
-    let grid = file.lines().map(|l| l.as_bytes()).collect::<Vec<&[u8]>>();
+    let grid: Vec<Vec<u8>> = file.lines().map(|l| l.bytes().collect()).collect();
 
     let max_y = grid.len();
 
@@ -29,7 +33,34 @@ pub fn part1(file_path: &str) -> Result<String, Box<dyn Error>> {
 }
 
 pub fn part2(file_path: &str) -> Result<String, Box<dyn Error>> {
-    todo!()
+    let file = read_to_string(file_path)?;
+    let grid: Vec<Vec<u8>> = file.lines().map(|l| l.bytes().collect()).collect();
+
+    let start = grid[0].iter().position(|c| c == &b'S').unwrap();
+
+    let mut map = HashMap::new();
+
+    Ok(calc((start, 0), &mut map, &grid).to_string())
+}
+
+fn calc(
+    (x, y): (usize, usize),
+    cache: &mut HashMap<(usize, usize), u64>,
+    grid: &Vec<Vec<u8>>,
+) -> u64 {
+    if y + 1 >= grid.len() {
+        1
+    } else if let Some(i) = cache.get(&(x, y)) {
+        *i
+    } else if grid[y + 1][x] != b'.' {
+        let res = calc((x + 1, y + 1), cache, grid) + calc((x - 1, y + 1), cache, grid);
+        cache.insert((x, y), res);
+        res
+    } else {
+        let res = calc((x, y + 1), cache, grid);
+        cache.insert((x, y), res);
+        res
+    }
 }
 
 #[cfg(test)]
@@ -42,8 +73,9 @@ mod tests {
         assert_eq!(res, "21");
     }
 
+    #[test]
     fn test_day07_02() {
         let res = part2("inputs/07/demo.txt").unwrap();
-        assert_eq!(res, "");
+        assert_eq!(res, "40");
     }
 }
