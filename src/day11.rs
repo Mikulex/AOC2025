@@ -104,8 +104,9 @@ mod tests {
         assert_eq!(res.to_string(), "5");
     }
 
-    fn _test_day11_02() {
-        let res = part2("inputs/11/demo.txt").unwrap();
+    #[test]
+    fn test_day11_02() {
+        let res = part2("inputs/11/demo2.txt").unwrap();
         assert_eq!(res.to_string(), "2");
     }
 }
